@@ -50,7 +50,7 @@ settings_default = {
 			HARVEST_WOOD = true,
 			HARVEST_HERB = true,
 			HARVEST_ORE = true,
-			MAX_FIGHT_TIME = 10,
+			MAX_FIGHT_TIME = 20,
 			DOT_PERCENT = 90,
 			LOGOUT_TIME = 0,
 			LOGOUT_SHUTDOWN = false,
@@ -116,7 +116,22 @@ settings_default = {
 			DEBUG_HARVEST = false, 			-- debug harvesting issues
 			DEBUG_WAYPOINT = false, 		-- debug waypoint issues
 			DEBUG_AUTOSELL = false, 		-- debug autosell issues
-			DEBUG_SKILLUSE = false,			-- debug skill use issues
+			WP_NO_STOP	= false,
+			WP_NO_COROUTINE = false,
+			WAYPOINT_DEG_SET = 15,
+			FLYLOOT = false,
+			ATTACK_MODE = "CLOSEST",
+			USE_PHIRIUS_POTION = false,
+			PHIRIUS_HP_LOW = 50,
+			PHIRIUS_MP_LOW = 50,
+			-- debug skill use issues
+			DEBUG_SKILLUSE = {
+				ENABLE 		= false,
+				TIMEGAP		= true,		-- show the time gap between cast starts
+				ONCOOLDOWN	= true,		-- show the time in ms that we are before the cooldown
+				NOCOOLDOWN	= true,		-- show the time in ms that we are over the cooldown
+				HPLOW		= true
+				},
 
 			-- expert inventar
 			INV_UPDATE_INTERVAL = 300,	 	-- full inventory update every x seconds (only used indirect atm)
@@ -129,7 +144,7 @@ settings_default = {
 			INV_AUTOSELL_STATS_NOSELL = nil,	-- stats (text search at right tooltip side) that will not be selled
 			INV_AUTOSELL_STATS_SELL = nil,		-- stats (text search at right tooltip side) that will be selled, even if in nosell
 			INV_AUTOSELL_NOSELL_STATSNUMBER = 3,-- If the item has this many or more named stats then don't sell
-
+			INV_AUTOSELL_TYPES = "dummy",
 
 		},
 		hotkeys = {  },
@@ -146,6 +161,8 @@ settings_default = {
 			onLevelup = nil,
 			onHarvest = nil,
 			onUnstickFailure = nil,
+			onZoneChange = nil,
+			onBagFull = nil,
 		}
 	},
 };
@@ -624,7 +641,35 @@ function settings.loadProfile(_name)
 			end;
 		end
 	end
+	
+	local loadOnZoneChange = function(node)
+		local luaCode = node:getValue();
+		if( luaCode == nil ) then return; end;
 
+		if( string.len(luaCode) > 0 and string.find(luaCode, "%w") ) then
+			settings.profile.events.onZoneChange = loadstring(luaCode);
+
+			assert(settings.profile.events.onZoneChange, sprintf(language[151], "onZoneChange"));
+
+			if( type(settings.profile.events.onZoneChange) ~= "function" ) then
+				settings.profile.events.onZoneChange = nil;
+			end;
+		end
+	end
+	local loadOnBagFull = function(node)
+		local luaCode = node:getValue();
+		if( luaCode == nil ) then return; end;
+
+		if( string.len(luaCode) > 0 and string.find(luaCode, "%w") ) then
+			settings.profile.events.onBagFull = loadstring(luaCode);
+
+			assert(settings.profile.events.onBagFull, sprintf(language[151], "onBagFull"));
+
+			if( type(settings.profile.events.onBagFull) ~= "function" ) then
+				settings.profile.events.onBagFull = nil;
+			end;
+		end
+	end
 	local loadOnDeathEvent = function(node)
 		local luaCode = node:getValue();
 		if( luaCode == nil ) then return; end;
@@ -736,6 +781,14 @@ function settings.loadProfile(_name)
 				settings.profile.events.onUnstickFailure = nil;
 			end;
 		end
+	end
+
+	local skillSort = function(tab1, tab2)
+		if( tab2.priority < tab1.priority ) then
+			return true;
+		end;
+
+		return false;
 	end
 
 	local loadSkills = function(node)
@@ -972,6 +1025,10 @@ function settings.loadProfile(_name)
 			loadOnLeaveCombatEvent(v);
 		elseif( string.lower(name) == "precodeonelite" ) then
 			loadPreCodeOnElite(v);
+		elseif( string.lower(name) == "onzonechange" ) then
+			loadOnZoneChange(v);
+		elseif( string.lower(name) == "onbagfull" ) then
+			loadOnBagFull(v);
 		elseif( string.lower(name) == "onlevelup" ) then
 			loadOnLevelupEvent(v);
 		elseif( string.lower(name) == "onskillcast" ) then

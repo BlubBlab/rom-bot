@@ -72,7 +72,10 @@ function selectGame(character)
 	end
 	-- Get list of windows in an array
 	local windowList = findWindowList("*", "Radiant Arcana");
-
+	
+	if(not windowList or #windowList == 0 ) then
+		windowList = findWindowList("*", "Runes of Magic");
+	end
 	if( #windowList == 0 ) then
 		print("You need to run rom first!");
 		return 0;
@@ -544,6 +547,13 @@ function loadPaths( _wp_path, _rp_path)
 		return;
 	end;
 
+	--changeProfileOption("WP_NO_STOP", false);
+	keyboardRelease( settings.hotkeys.MOVE_FORWARD.key );
+	keyboardRelease( settings.hotkeys.ROTATE_LEFT.key );
+	keyboardRelease( settings.hotkeys.ROTATE_RIGHT.key );
+	releaseKeys();
+	
+	
 	-- check suffix and remember default return path name
 	local rp_default;
 	if(_wp_path ~= nil) then
@@ -1235,6 +1245,9 @@ end
 -- change profile options and print values in MM protocol
 function changeProfileOption(_option, _value)
 
+	if( player.unstick_break == true and _option == "WP_NO_STOP")then
+		player.unstick_break = false;
+	end
 	if( settings.profile.options[_option] == nil ) then
 		cprintf(cli.green, language[173], _option );	-- Unknown profile option
 		return;
@@ -1483,7 +1496,46 @@ function getNearestSegmentPoint(x, z, a, b, c, d)
 
 	return CWaypoint(nx, nz);
 end
+-- Returns the point that is nearest to (X,Z,Y) between segment (A,B,C) and (D,E,F)
+function getNearestSegmentPoint3D(x, z, y, a, b, c, d ,e ,f)
+	
+	if( not y or not c or not f)then
+		return  getNearestSegmentPoint(x ,z ,a ,b ,d ,e)
+	end
+	if a == d and b == e and c == f then
+		return CWaypoint(a, b, c)
+	end
 
+	local dx1 = x - a;
+	local dz1 = z - b;
+	local dy1 = y - c;
+	
+	local dx2 = d - a;
+	local dz2 = e - b;
+	local dy2 = f - c;
+
+	local dot = dx1 * dx2 + dz1 * dz2 + dy1 * dy2;
+	local len_sq = dx2 * dx2 + dz2 * dz2 + dy2 * dy2;
+	local param = dot / len_sq;
+
+	local nx, nz , ny;
+
+	if( param < 0 ) then
+		nx = a;
+		nz = b;
+		ny = c;
+	elseif( param > 1 ) then
+		nx = d;
+		nz = e;
+		ny = f;
+	else
+		nx = a + param * dx2;
+		nz = b + param * dz2;
+		ny = c + param * dy2;
+	end
+
+	return CWaypoint(nx, nz ,ny);
+end
 function waitForLoadingScreen(_maxWaitTime)
 	local oldAddress = player.Address
 
@@ -1863,7 +1915,7 @@ function AcceptQuestByName(_nameorid, _questgroup)
 
 	-- Check if we have target
 	player:updateTargetPtr()
-	yrest(100)
+	yrest(50)
 	if (player.TargetPtr == 0 or player.TargetPtr == nil) then
 		print("No target! Target NPC before using AcceptQuestByName")
 		return
@@ -1900,10 +1952,10 @@ function AcceptQuestByName(_nameorid, _questgroup)
 			  (_questgroup == nil or _questgroup == qgroup) then -- And match quest group
 				matchFound = true
 				repeat
-					RoMCode("OnClick_QuestListButton(1,"..i..")") -- Clicks the quest
-					yrest(100)
-					RoMCode("AcceptQuest()") -- Accepts the quest
-					yrest(100)
+					RoMScript("OnClick_QuestListButton(1,"..i..")") -- Clicks the quest
+				--	yrest(100)
+					RoMScript("AcceptQuest()") -- Accepts the quest
+				--	yrest(100)
 				until (getQuestStatus(questOnBoard, qgroup)=="incomplete" or getQuestStatus(questOnBoard, qgroup)=="complete") -- Try again if accepting didn't work
 				printf("Quest accepted: %s\n",questOnBoard)
 
@@ -1911,7 +1963,7 @@ function AcceptQuestByName(_nameorid, _questgroup)
 				if (questToAccept ~= "" and questToAccept ~= "all") then
 					break
 				end
-				yrest(200)
+			--	yrest(200)
 			elseif questToAccept ~= "" and questToAccept ~= "all" and i==availableQuests then
 				-- Didn't find name match
 				printf("Questname not found: %s\n",questToAccept) -- Quest not found
@@ -1920,8 +1972,8 @@ function AcceptQuestByName(_nameorid, _questgroup)
 			print("Maxim number of quests in questbook!")
 		end
 	end
-	RoMCode("SpeakFrame:Hide()")
-	yrest(750)
+	RoMScript("SpeakFrame:Hide()")
+--	yrest(750)
 	return matchFound
 end
 
@@ -1981,7 +2033,7 @@ function CompleteQuestByName(_nameorid, _rewardnumberorname, _questgroup)
 
 	-- Check if we have target
 	player:updateTargetPtr()
-	yrest(100)
+--	yrest(100)
 	if (player.TargetPtr == 0 or player.TargetPtr == nil) then
 		print("No target! Target NPC before using CompleteQuestByName")
 		return
@@ -1991,7 +2043,7 @@ function CompleteQuestByName(_nameorid, _rewardnumberorname, _questgroup)
 	local starttime = os.clock()
 	repeat
 		Attack()
-		yrest(500)
+		yrest(250)
 	until RoMScript("SpeakFrame:IsVisible()") or os.clock() - starttime > 5000
 	if not RoMScript("SpeakFrame:IsVisible()") then
 		error("NPC dialog failed to open!")
@@ -2015,16 +2067,16 @@ function CompleteQuestByName(_nameorid, _rewardnumberorname, _questgroup)
 		  (_questgroup == nil or _questgroup == qgroup) then -- And match quest group
 			local _counttime = os.time()
 			repeat
-				RoMCode("OnClick_QuestListButton(3, "..i..")") -- Clicks the quest
-				yrest(100)
+				RoMScript("OnClick_QuestListButton(3, "..i..")") -- Clicks the quest
+			--	yrest(100)
 
 				if _rewardnumberorname then
 							if DEBUG then
 								printf("_rewardnumberorname: %s \n",_rewardnumberorname)
 							end
 					if type(_rewardnumberorname) == "number" then
-						RoMCode("SpeakFrame_ClickQuestReward(SpeakQuestReward1_Item".._rewardnumberorname..")")
-						yrest(100)
+						RoMScript("SpeakFrame_ClickQuestReward(SpeakQuestReward1_Item".._rewardnumberorname..")")
+					--	yrest(100)
 					elseif type(_rewardnumberorname) == "string" then
 						-- Search for reward name
 						local found = false
@@ -2037,8 +2089,8 @@ function CompleteQuestByName(_nameorid, _rewardnumberorname, _questgroup)
 							local rewardName = RoMScript("SpeakQuestReward1_Item"..rewardNum.."_Desc:GetText()")
 							if FindNormalisedString(rewardName, _rewardnumberorname) then
 								found = true
-								RoMCode("SpeakFrame_ClickQuestReward(SpeakQuestReward1_Item"..rewardNum..")")
-								yrest(100)
+								RoMScript("SpeakFrame_ClickQuestReward(SpeakQuestReward1_Item"..rewardNum..")")
+							--	yrest(100)
 								break
 							end
 						end
@@ -2051,14 +2103,11 @@ function CompleteQuestByName(_nameorid, _rewardnumberorname, _questgroup)
 						return
 					end
 				elseif (os.time() - _counttime) >= 2 then -- quest still there because of reward item needs choosing
-					RoMCode("SpeakFrame_ClickQuestReward(SpeakQuestReward1_Item1)")
-					yrest(100)
+					RoMScript("SpeakFrame_ClickQuestReward(SpeakQuestReward1_Item1)")
+				--	yrest(100)
 				end
-				RoMCode("CompleteQuest()") -- Completes the quest
-				yrest(100)
-				if _rewardnumberorname then
-					yrest(900) -- Give extra time for quests with rewards
-				end
+				RoMScript("CompleteQuest()") -- Completes the quest
+			--	yrest(100)
 			until (getQuestStatus(questOnBoard,qgroup)~="complete")
 			printf("Quest completed: %s\n",questOnBoard)
 
@@ -2066,13 +2115,13 @@ function CompleteQuestByName(_nameorid, _rewardnumberorname, _questgroup)
 			if (questToComplete ~= "" and questToComplete ~= "all") then
 				break
 			end
-			yrest(200)
+		--	yrest(200)
 		elseif questToComplete ~= "" and questToComplete ~= "all" and i==availableQuests then
 			printf("Questname not found: %s\n",questToComplete)
 		end
 	end
-	RoMCode("SpeakFrame:Hide()")
-	yrest(750)
+	RoMScript("SpeakFrame:Hide()")
+--	yrest(750)
 end
 
 function AcceptAllQuests(_questgroup)
@@ -2090,10 +2139,10 @@ function CancelQuest(nameorid)
 		if questId == nameorid or string.find(GetIdName(questId), nameorid, 1, true) then
 			-- match found, delete
 			RoMCode("g_SelectedQuest = "..index)
-			RoMCode("ViewQuest_QuestBook( g_SelectedQuest )")
-			yrest(500)
-			RoMCode("DeleteQuest()")
-			yrest(1000)
+			RoMScript("ViewQuest_QuestBook( g_SelectedQuest )")
+			--yrest(500)
+			RoMScript("DeleteQuest()")
+			--yrest(1000)
 			return
 		else
 			index = index + 1
@@ -2187,7 +2236,35 @@ function ChoiceOptionByName(optiontext)
 	printf("Option \"%s\" not found.\n",optiontext)
     return false
 end
-
+function PressMenu( _option )
+	if (player.TargetPtr == 0 or player.TargetPtr == nil) then
+		print("No target! Target NPC before using PressMenu")
+		return false;
+	end
+	local starttime = os.clock()
+	while(not RoMScript("SpeakFrame:IsVisible()") and os.clock() - starttime <= 1500)do
+		yrest(50)
+	end
+	--secound try to avoid use Attack() on the first place.
+	if(not RoMScript("SpeakFrame:IsVisible()"))then
+		local starttime2 = os.clock()
+		while(not RoMScript("SpeakFrame:IsVisible()") and os.clock() - starttime2 <= 2500)do
+			Attack()
+			yrest(50)
+		end
+		-- all eforts failed
+		if(not RoMScript("SpeakFrame:IsVisible()"))then
+			return false;
+		end
+	end
+	if(type( _option) == "string")then
+		ChoiceOptionByName( _option)
+	else
+		RoMScript("ChoiceOption(".._option..");");
+	end
+	
+	return true;
+end
 function PointInPoly(vertices, testx, testz )
 -- Tells you if a point (testx,testz) is within a polygon represented by a table of points in 'vertices'
 	if type(vertices) == "string" then
@@ -2711,12 +2788,18 @@ function getCurrency(name)
 end
 
 function isClientCrashed()
+--	printf("Test if client is crashed\n");
 	local crashwins = findWindowList("Crash Report", "#32770");
-
+	local numcrashs =  #crashwins;
+--	
 	if( #crashwins == 0 ) then
 		return false
 	end
-
+	printf("Found "..numcrashs.." crashed clients \n");
+	if(	onClientCrash() ~= nil)then
+			onClientCrash();
+		return false;
+	end
 	local crashparent
 	for i = 1, #crashwins, 1 do
 		crashparent = getWindowParent(crashwins[i])

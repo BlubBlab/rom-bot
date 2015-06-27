@@ -1,5 +1,9 @@
 <waypoints>
-	<!-- # 1 --><waypoint x="-1948" z="-6378" y="33">	</waypoint>
+<onload> 
+	player:mount()	
+	changeProfileOption("TARGET_LEVELDIF_BELOW",40);
+</onload>
+	<!-- # 1 --><waypoint x="-1948" z="-6378" y="33"  WP_NO_STOP="true">	</waypoint>
 	<!-- # 2 --><waypoint x="-2096" z="-6500" y="54">	</waypoint>
 	<!-- # 3 --><waypoint x="-2190" z="-6476" y="51">	</waypoint>
 	<!-- # 4 --><waypoint x="-2304" z="-6291" y="68">	</waypoint>
@@ -13,7 +17,7 @@
 	<!-- # 11 --><waypoint x="-2139" z="-6335" y="52">	</waypoint>
 	<!-- # 12 --><waypoint x="-1986" z="-6486" y="48">	</waypoint>
 	<!-- # 13 --><waypoint x="-1905" z="-6255" y="48">	</waypoint>
-	<!-- # 14 --><waypoint x="-1852" z="-6124" y="69">
+	<!-- # 14 --><waypoint x="-1852" z="-6124" y="69"  WP_NO_STOP="false">
 		if getQuestStatus(420486) ~= "incomplete" then -- A beautiful Necklace
 			loadPaths("1-10PioneersQuests/l7t_Logar")
 		end

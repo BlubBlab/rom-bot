@@ -13,6 +13,9 @@ CWaypoint = class(
 			self.Action = copyfrom.Action;
 			self.Type = copyfrom.Type;
 			self.Tag = copyfrom.Tag;
+			self.WP_NO_STOP = copyfrom.WP_NO_STOP;
+			self.WP_ZONE = copyfrom.WP_ZONE;
+			self.WP_NO_COROUTINE = copyfrom.WP_NO_COROUTINE;
 		else
 			self.X = _X;
 			self.Z = _Z;
@@ -20,6 +23,9 @@ CWaypoint = class(
 			self.Action = nil; -- String containing Lua code to execute when reacing the point.
 			self.Type = WTP_NORMAL;
 			self.Tag = "";
+			self.WP_NO_STOP = nil;
+			self.WP_ZONE = 0;
+			self.WP_NO_COROUTINE = nil;
 		end
 
 		if( not self.X ) then self.X = 0.0; end;

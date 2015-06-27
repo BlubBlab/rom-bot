@@ -1,6 +1,6 @@
 <waypoints type="TRAVEL">
 <onload> player:mount() </onload>
-	<!-- # 1 --><waypoint x="94" z="-1199"></waypoint>
+	<!-- # 1 --><waypoint x="94" z="-1199"  WP_NO_STOP="true"></waypoint>
 	<!-- # 2 --><waypoint x="185" z="-1111"></waypoint>
 	<!-- # 3 --><waypoint x="313" z="-903"></waypoint>
 	<!-- # 4 --><waypoint x="462" z="-726"></waypoint>
@@ -17,14 +17,14 @@
 	<!-- #15 --><waypoint x="1775" z="867"></waypoint>
 	<!-- #16 --><waypoint x="1848" z="918"></waypoint>
 	<!-- #17 --><waypoint x="2105" z="986"></waypoint>
-	<!-- #18 --><waypoint x="2303" z="1134">
+	<!-- #18 --><waypoint x="2303" z="1134"  WP_NO_STOP="false">
 		player:target_NPC(111256); -- Snoop the Stubborn
 		player:rest(2);
 		sendMacro("SpeakFrame_Hide()");
 		</waypoint>
-	<!-- #19 --><waypoint x="2459" z="1138"></waypoint>
+	<!-- #19 --><waypoint x="2459" z="1138"  WP_NO_STOP="true"></waypoint>
 	<!-- #20 --><waypoint x="2578" z="1011"></waypoint>
-	<!-- #21 --><waypoint x="2755" z="960">
+	<!-- #21 --><waypoint x="2755" z="960"  WP_NO_STOP="false">
 		player:target_NPC(110755); -- Lieve
 		player:rest(2);
 		sendMacro("ChoiceOption(1);");
@@ -33,7 +33,7 @@
 		player:update();
 		__WPL:setWaypointIndex(__WPL:getNearestWaypoint(player.X, player.Z));
 	</waypoint>
-	<!-- #22 --><waypoint x="2901" z="586"></waypoint>
+	<!-- #22 --><waypoint x="2901" z="586"  WP_NO_STOP="true"></waypoint>
 	<!-- #23 --><waypoint x="3032" z="414"></waypoint>
 	<!-- #24 --><waypoint x="3207" z="180"></waypoint>
 	<!-- #25 --><waypoint x="3373" z="-47"></waypoint>
@@ -82,7 +82,7 @@
 	<!-- #69 --><waypoint x="5397" z="-4202"></waypoint>
 	<!-- #69 --><waypoint x="5436" z="-4269"></waypoint>
 	<!-- #70 --><waypoint x="5523" z="-4356"></waypoint>
-	<!-- #71 --><waypoint x="5529" z="-4428">
+	<!-- #71 --><waypoint x="5529" z="-4428"  WP_NO_STOP="false">
 	player:target_NPC(111367); -- Lehman
 	AcceptQuestByName(421457); -- The Arcane Transmutor
 	CompleteQuestByName(421457) -- The Arcane Transmutor

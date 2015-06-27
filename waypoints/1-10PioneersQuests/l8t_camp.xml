@@ -4,13 +4,13 @@
 	<!-- #  2 --><waypoint x="-1204" z="-4979" y="53">
 		__WPL:setWaypointIndex(__WPL:findWaypointTag("Pnor"))
 	</waypoint>
-	<!-- #  1 --><waypoint x="-1159" z="-4168" y="10">	</waypoint>
+	<!-- #  1 --><waypoint x="-1159" z="-4168" y="10"  WP_NO_STOP="true">	</waypoint>
 	<!-- #  2 --><waypoint x="-1241" z="-4232" y="7">	</waypoint>
 	<!-- #  3 --><waypoint x="-1318" z="-4364" y="-6">	</waypoint>
 	<!-- #  4 --><waypoint x="-1357" z="-4512" y="-19">	</waypoint>
 	<!-- #  5 --><waypoint x="-1448" z="-4704" y="-19">	</waypoint>
 	<!-- #  6 --><waypoint x="-1449" z="-4917" y="-18" type="RUN">	</waypoint>
-	<!-- #  7 --><waypoint x="-1407" z="-5002" y="-11" tag="Pnor">
+	<!-- #  7 --><waypoint x="-1407" z="-5002" y="-11" tag="Pnor"  WP_NO_STOP="false">
 		player:mount()
 		player:target_NPC(110056); -- Pnor
 		CompleteQuestByName(420064) -- The Lost Supplies
@@ -21,10 +21,10 @@
 		player:target_NPC(110601); -- Black Bolton
 		CompleteQuestByName(420531) -- Strong Boars
 	</waypoint>
-	<!-- # 17 --><waypoint x="-1635" z="-4768" y="-11">	</waypoint>
+	<!-- # 17 --><waypoint x="-1635" z="-4768" y="-11"  WP_NO_STOP="true">	</waypoint>
 	<!-- # 18 --><waypoint x="-1795" z="-4659" y="-2">	</waypoint>
 	<!-- # 19 --><waypoint x="-1881" z="-4621" y="5">	</waypoint>
-	<!-- # 20 --><waypoint x="-1922" z="-4653" y="6">
+	<!-- # 20 --><waypoint x="-1922" z="-4653" y="6"  WP_NO_STOP="false">
 		player:target_NPC(110062); -- Furganda
 		CompleteQuestByName(420680) -- The Supply Status
 		loadPaths("1-10pioneersquests/l9t_bugs")

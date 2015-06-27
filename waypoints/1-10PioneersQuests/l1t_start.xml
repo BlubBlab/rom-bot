@@ -1,4 +1,8 @@
 <waypoints type="RUN">
+<onload>
+	player:mount()
+	__WPL:setWaypointIndex(1)
+</onload>
 	<!-- #  1 --><waypoint x="-4069" z="-8247">	</waypoint>
 	<!-- #  1 --><waypoint x="-4045" z="-8278">
 					player:target_NPC(110484); -- Laif Cindai

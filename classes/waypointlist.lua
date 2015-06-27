@@ -55,7 +55,9 @@ function CWaypointList:load(filename)
 		local action = v:getValue();
 		local name = v:getName() or "";
 		local tag = v:getAttribute("tag") or "";
-
+		local wpstop = v:getAttribute("WP_NO_STOP");
+		local wpzone =  v:getAttribute("WP_ZONE");
+		local wpco  = v:getAttribute("WP_NO_COROUTINE");
 		if( string.lower(name) == "waypoint" ) then
 			local tmp = CWaypoint(x, z, y);
 			if( action ) then tmp.Action = action; end;
@@ -74,9 +76,12 @@ function CWaypointList:load(filename)
 				-- No type set, assume Type from header tag
 				tmp.Type = self.Type;
 			end
-
+				
 			if( tag ) then tmp.Tag = string.lower(tag); end;
-
+			if ( wpstop~=nil ) then tmp.WP_NO_STOP = wpstop; end;
+			if ( wpzone~=nil ) then tmp.WP_ZONE =   wpzone; end;
+			if ( wpco~=nil ) then tmp.WP_NO_COROUTINE = wpco; end;
+			
 			table.insert(self.Waypoints, tmp);
 		elseif( string.lower(name) == "onload" ) then
 			if( string.len(action) > 0 and string.find(action, "%w") ) then
@@ -256,26 +261,57 @@ function CWaypointList:setWaypointIndex(index)
 	self.LastWaypoint = self.CurrentWaypoint
 	self.CurrentWaypoint = index;
 end
-
+--start can be also the boolen for plain
 -- Returns an index to the waypoint closest to the given point.
-function CWaypointList:getNearestWaypoint(_x, _z, _y, _start, _end)
+function CWaypointList:getNearestWaypoint(_x, _z, _y, _start, _end, _plain)
+	
+	local do_we_found = false;
+	
+	if(not settings.profile.options.DROPHEIGHT)then
+		settings.profile.options.DROPHEIGHT = 35;
+	end
+	
 	if type(_start) == "string" then
 		_start = self:findWaypointTag(_start)
 	end
 	if type(_end) == "string" then
 		_end = self:findWaypointTag(_end)
 	end
+	---make it adaptable 
+	if type(_start) == "boolean" then
+		_plain = _start;
+		_start = nil;
+		_end = nil;
+	end
+	
+	if type(_end) == "boolean" then
+		_plain = _end;
+		_end = nil;
+	end
+	
 	if _start and _start < 1 then _start = 1 end
 	if _end and _end > #self.Waypoints then _end = #self.Waypoints end
-
+	
 	local closest = _start or 1;
-
+	
 	for i = (_start or 1), (_end or #self.Waypoints) do
-		local v= self.Waypoints[i]
+		local v = self.Waypoints[i];
 		local oldClosestWp = self.Waypoints[closest];
-		if( distance(_x, _z, _y, v.X, v.Z, v.Y) < distance(_x, _z, _y, oldClosestWp.X, oldClosestWp.Z, oldClosestWp.Y) ) then
-			closest = i;
+		
+		if( _plain  and v.Y and _y)then
+			if( distance(_x, _z, _y, v.X, v.Z, v.Y) < distance(_x, _z, _y, oldClosestWp.X, oldClosestWp.Z, oldClosestWp.Y) and math.abs(_y - v.Y) < settings.profile.options.DROPHEIGHT + 5 ) then
+				do_we_found = true;
+				closest = i;
+			end
+		else
+			if( distance(_x, _z, _y, v.X, v.Z, v.Y) < distance(_x, _z, _y, oldClosestWp.X, oldClosestWp.Z, oldClosestWp.Y) ) then
+				do_we_found = true;
+				closest = i;
+			end
 		end
+	end
+	if(do_we_found == false and  _plain)then
+		return self:getNearestWaypoint(_x, _z, _y, false)
 	end
 
 	return closest;

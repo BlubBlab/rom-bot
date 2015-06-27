@@ -135,6 +135,7 @@ CSkill = class(
 			self.ClickToCast = copyfrom.ClickToCast
 			self.GlobalCooldown = copyfrom.GlobalCooldown
 			self.AddWeaponRange = copyfrom.AddWeaponRange
+			self.NeedAmmo = copyfrom.NeedAmmo
 			self.PlayerBlock = copyfrom.PlayerBlock;
 			self.PlayerDodge = copyfrom.PlayerDodge;
 			self.EnemyCritical = copyfrom.EnemyCritical;
@@ -220,7 +221,10 @@ function CSkill:canUse(_only_friendly, target)
 		debug_skilluse("ONLYFRIENDLY", self.Type);
 		return false;
 	end
-
+	if self.NeedAmmo and inventory:getAmmunitionCount() == 0 then
+		debug_skilluse("NOAMMO",inventory:getAmmunitionCount());
+		return false;
+	end
 
 	-- Still cooling down...
 	local prior = getSkillUsePrior();
@@ -642,7 +646,46 @@ function CSkill:use()
 		settings.profile.options.SKILL_GLOBALCOOLDOWN - prior ) do
 		yrest(10);
 	end]]
-
+	if self.AOECenter and self.AOECenter == SAOE_PLAYER and settings.profile.options.FORCE_BETTER_AOE_TARGETING == true then
+		if( self.AOERange == nil )then
+			 self.AOERange = self.Range;
+		end
+		if( target == nil)then
+			if( player:haveTarget() ) then
+				target = player:getTarget();
+			else
+				target = player;
+			end
+		end
+		player:updateXYZ()
+	
+		local mobcount, mX, mZ = target:findBestClickPoint(self.AOERange, settings.profile.options.MAX_TARGET_DIST, settings.profile.options.COUNT_AGGRO_ONLY)
+		local distL =  distance(player.X, player.Z, player.Y, mX, mZ,target.Y);
+		if distL < 300  then
+			if( teleport ~= nil and settings.profile.options.FLYLOOT == true)then
+				keyboardRelease( settings.hotkeys.MOVE_FORWARD.key );
+				--player:waitTillStopMoving(); -- Wait to stop only if not an instant cast spell
+			
+				teleport(mX,mZ,target.Y, true);
+			else
+				print("Teleport not found \n");
+			end
+		else
+			print(" Attack-Point too far away \n");
+		end
+		--yrest(100)
+		if( teleport == nil)then
+			player:updateXYZ()
+		end
+		if( teleport == nil or distance(player.X, player.Z, player.Y, mX , mZ ,target.Y) > 20)then
+			local success, reason = player:moveTo(CWaypoint(mX, mZ,target.Y ), true, false,0);
+			if( not success ) then
+				player.Success_waypoints = 0;	-- counter for successfull waypoints in row
+				player.Unstick_counter = player.Unstick_counter + 1;	-- count our unstick tries
+			end
+		end
+		
+	end
 	-- debug time gap between casts
 	player:updateCasting()
 	if settings.profile.options.DEBUG_SKILLUSE == true then

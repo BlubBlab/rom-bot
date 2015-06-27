@@ -770,7 +770,17 @@ end
 function CPawn:getBuff(buffnamesorids, count)
 	self:updateBuffs()
 
-	-- for each buff the pawn has
+	--it's a number so we do it simple
+	if( type(tonumber(buffnamesorids))  == "number")then
+		-- for each buff the pawn has
+		for i, buff in pairs(self.Buffs) do
+			-- compare against each 'buffname'
+			if( tonumber(buffnamesorids) == buff.Id )then
+				--print("we do it")
+				return buff
+			end
+		end
+	end
 	for i, buff in pairs(self.Buffs) do
 		-- compare against each 'buffname'
 		for buffname in string.gmatch(buffnamesorids,"[^,]+") do
@@ -876,16 +886,28 @@ function CPawn:countMobs(inrange, onlyaggro, idorname)
 	return count
 end
 
-function CPawn:findBestClickPoint(aoerange, skillrange, onlyaggro)
+function CPawn:findBestClickPoint(aoerange, skillrange, onlyaggro, evalFunc)
 	-- Finds best place to click to get most mobs including this pawn.
 	self:updateXYZ()
 
 	player:updateXYZ()
 	local MobList = {}
 	local EPList = {}
-
+	
+    if( type(evalFunc) ~= "function" ) then
+		--default func
+		evalFunc = function (address,pawn)
+         	if pawn.Alive and pawn.HP >=1 and pawn.Attackable and pawn.Level > 1 then
+				return true
+			else
+			    return false
+			end
+		end;
+	end
 	local function CountMobsInRangeOfCoords(x,z)
 		local c = 0
+		local excludeList = false;
+		local included = false;
 		local list = {}
 		for k,mob in ipairs(MobList) do
 			if distance(x,z,mob.X,mob.Z) <= aoerange then
@@ -915,16 +937,17 @@ function CPawn:findBestClickPoint(aoerange, skillrange, onlyaggro)
 	local countmobs = self:countMobs(aoerange, onlyaggro)
 
 	-- Check if user wants to bypass this function
-	if settings.profile.options.FORCE_BETTER_AOE_TARGETING == false then
-		return countmobs, self.X, self.Z
-	end
+	-- Blubblab:c I'dont need that
+--	if settings.profile.options.FORCE_BETTER_AOE_TARGETING == false then
+--		return countmobs, self.X, self.Z
+--	end
 
 	-- First get list of mobs within (2 x aoerange) of this pawn and (skillrange + aoerange) from player.
 	local objectList = CObjectList();
 	objectList:update();
 	for i = 0,objectList:size() do
 		local obj = objectList:getObject(i);
-		if obj ~= nil and obj.Type == PT_MONSTER and (settings.profile.options.FORCE_BETTER_AOE_TARGETING == true or 0.5 > math.abs(obj.Y - self.Y)) and -- only count mobs on flat floor, results would be unpredictable on hilly surfaces when clicking.
+		if obj ~= nil and obj.Type == PT_MONSTER and (settings.profile.options.FORCE_BETTER_AOE_TARGETING or 0.5 > math.abs(obj.Y - self.Y)) and -- only count mobs on flat floor, results would be unpredictable on hilly surfaces when clicking.
 		  aoerange*2 >= distance(self.X,self.Z,self.Y,obj.X,obj.Z,obj.Y) and (skillrange + aoerange >= distance(player.X, player.Z, obj.X, obj.Z)) then
 			local pawn = CPawn.new(obj.Address);
 			pawn:updateAlive()
@@ -932,7 +955,7 @@ function CPawn:findBestClickPoint(aoerange, skillrange, onlyaggro)
 			pawn:updateAttackable()
 			pawn:updateLevel()
 			pawn:updateXYZ() -- For the rest of the function
-			if pawn.Alive and pawn.HP >=1 and pawn.Attackable and pawn.Level > 1 then
+			 if evalFunc(pawn.Address,pawn)== true then
 				if onlyaggro == true then
 					pawn:updateTargetPtr()
 					if pawn.TargetPtr == player.Address then
@@ -962,7 +985,8 @@ function CPawn:findBestClickPoint(aoerange, skillrange, onlyaggro)
 			local mob2 = MobList[p2]
 			local ep1, ep2 = GetEquidistantPoints(mob1, mob2, aoerange - 3) -- '-1' buffer
 			-- Check ep1 and add
-			if aoerange >= distance(ep1, self) then -- EP doesn't miss primary target(self)
+			local dist = distance(player.X, player.Z, ep1.X, ep1.Z)
+			if aoerange >= distance(ep1, self) or (settings.profile.options.FORCE_BETTER_AOE_TARGETING and dist < settings.profile.options.MAX_TARGET_DIST and dist < settings.profile.options.COMBAT_DISTANCE) then -- EP doesn't miss primary target(self)
 				local tmpcount, tmplist = CountMobsInRangeOfCoords(ep1.X, ep1.Z)
 				if tmpcount > bestscore then
 					bestscore = tmpcount
@@ -973,8 +997,9 @@ function CPawn:findBestClickPoint(aoerange, skillrange, onlyaggro)
 					table.insert(EPList,ep1)
 				end
 			end
+			local dist2 = distance(player.X, player.Z, ep2.X, ep2.Z)
 			-- Check ep2 and add
-			if aoerange > distance(ep2,self) then -- EP doesn't miss primary target(self)
+			if aoerange > distance(ep2,self)  or (settings.profile.options.FORCE_BETTER_AOE_TARGETING and dist2 < settings.profile.options.MAX_TARGET_DIST and dist2 < settings.profile.options.COMBAT_DISTANCE)then -- EP doesn't miss primary target(self)
 				local tmpcount, tmplist = CountMobsInRangeOfCoords(ep2.X, ep2.Z)
 				if tmpcount > bestscore then
 					bestscore = tmpcount
@@ -989,7 +1014,7 @@ function CPawn:findBestClickPoint(aoerange, skillrange, onlyaggro)
 	end
 
 	-- Is best score good enough to beat self:countMobs?
-	if countmobs > bestscore then
+	if countmobs >= bestscore then
 		return countmobs, self.X, self.Z
 	end
 

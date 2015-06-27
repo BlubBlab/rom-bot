@@ -16,7 +16,7 @@ function database.load()
 		local name, id, mana, targetmaxhpper, targetmaxhp, maxhpper, maxmanaper, rage, energy, focus, nature;
 		local range, minrange, casttime, cooldown, type, target, autouse;
 		local toggleable, minmanaper, inbattle, priority, level, aslevel, skilltab, skillnum;
-		local buffname, reqbuffcount, reqbufftarget, reqbuffname, nobuffcount, nobufftarget, nobuffname;
+		local buffname, reqbuffcount, reqbufftarget, reqbuffname, nobuffcount, nobufftarget, nobuffname, needammo;
 		local enemydodge, enemycritical, playerblock, playerdodge
 
 		name = v:getAttribute("name");
@@ -54,7 +54,7 @@ function database.load()
 		clicktocast = v:getAttribute("clicktocast")
 		globalcooldown = v:getAttribute("globalcooldown")
 		addweaponrange = v:getAttribute("addweaponrange")
-
+		needammo = v:getAttribute("needammo")
 		-- Automatically assign priority (if not given) based on type
 		if( not priority ) then
 			if( type == "damage" ) then
@@ -153,6 +153,7 @@ function database.load()
 		if(clicktocast ~= "") then tmp.ClickToCast = clicktocast; end;
 		if(globalcooldown ~= nil) then tmp.GlobalCooldown = globalcooldown; end;
 		if(addweaponrange ~= nil) then tmp.AddWeaponRange = addweaponrange; end;
+		if(needammo ~= nil) then tmp.NeedAmmo = needammo; end;
 
 		if(enemydodge) then tmp.EnemyDodge = true; end;
 		if(enemycritical) then tmp.EnemyCritical = true; end;

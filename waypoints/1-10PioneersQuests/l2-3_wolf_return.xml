@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><waypoints>
-	<!-- #  1 --><waypoint x="-2720" z="-8405" y="232">	</waypoint>
+<onload>
+	player:mount()
+</onload
+	<!-- #  1 --><waypoint x="-2720" z="-8405" y="232" WP_NO_STOP="true">	</waypoint>
 	<!-- #  2 --><waypoint x="-2606" z="-8528" y="201">	</waypoint>
 	<!-- #  3 --><waypoint x="-2565" z="-8612" y="192">	</waypoint>
 	<!-- #  4 --><waypoint x="-2528" z="-8664" y="201">	</waypoint>

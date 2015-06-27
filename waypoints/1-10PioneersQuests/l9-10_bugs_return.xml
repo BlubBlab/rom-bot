@@ -1,5 +1,9 @@
 <waypoints type="TRAVEL" >
-	<!-- # 1 --><waypoint x="2387" z="1685"></waypoint>
+<onload> 
+	player:mount()	
+	changeProfileOption("TARGET_LEVELDIF_BELOW",40);
+</onload>
+	<!-- # 1 --><waypoint x="2387" z="1685"  WP_NO_STOP="true"></waypoint>
 	<!-- # 2 --><waypoint x="2494" z="1491"></waypoint>
 	<!-- # 3 --><waypoint x="2394" z="1249"></waypoint>
 	<!-- # 4 --><waypoint x="2235" z="1132"></waypoint>

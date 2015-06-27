@@ -8,7 +8,7 @@
 			end
 		end
 	</onLoad>
-	<!-- #  1 --><waypoint x="205" z="-8187">
+	<!-- #  1 --><waypoint x="205" z="-8187" WP_NO_STOP="true">
 		checkquest()
 	</waypoint>
 	<!-- #  2 --><waypoint x="344" z="-8057">

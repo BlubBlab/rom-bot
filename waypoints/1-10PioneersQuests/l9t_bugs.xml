@@ -1,6 +1,9 @@
 <waypoints type="TRAVEL" >
-<onload> player:mount() </onload>
-	<!-- # 1 --><waypoint x="-1936" z="-4665" y="5">	</waypoint>
+<onload> 
+	player:mount() 
+	changeProfileOption("TARGET_LEVELDIF_BELOW",40);
+</onload>
+	<!-- # 1 --><waypoint x="-1936" z="-4665" y="5"  WP_NO_STOP="true">	</waypoint>
 	<!-- # 2 --><waypoint x="-1899" z="-4560" y="5">	</waypoint>
 	<!-- # 3 --><waypoint x="-1642" z="-4402" y="48">	</waypoint>
 	<!-- # 4 --><waypoint x="-1514" z="-4322" y="31">	</waypoint>
@@ -21,7 +24,7 @@
 	<!-- #18 --><waypoint x="-88" z="-1349"></waypoint>
 	<!-- #19 --><waypoint x="125" z="-1206"></waypoint>
 	<!-- #20 --><waypoint x="303" z="-1166"></waypoint>
-	<!-- #21 --><waypoint x="426" z="-1106">
+	<!-- #21 --><waypoint x="426" z="-1106"  WP_NO_STOP="false">
 		loadPaths("1-10Pioneersquests/l9-10_bugs");
 	</waypoint>
 </waypoints>

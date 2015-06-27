@@ -137,7 +137,20 @@ text = sprintf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" ..
 	"RoM Bot Version %0.2f, Revision %s\n", BOT_VERSION, BOT_REVISION);
 
 printPicture("logo", text, 4);
-
+function checkclient()
+	local crashflag, cpid = isClientCrashed();
+	if crashflag then
+		error("Game Crashed");
+	end
+end
+function checklogin()
+	local logflag =  isInGame();
+	if( logflag == false)then
+		if(onClientLogout() ~= nil)then
+			onClientLogout()
+		end
+	end
+end
 function main()
 	local forcedProfile = nil;
 	local forcedPath = nil;
@@ -680,11 +693,11 @@ function main()
 	-- look for the closest waypoint / return path point to start
 	if( __RPL and __WPL.Mode ~= "wander" ) then	-- return path points available ?
 		-- compare closest waypoint with closest returnpath point
-		__WPL:setWaypointIndex( __WPL:getNearestWaypoint(player.X, player.Z, player.Y ) );
+		__WPL:setWaypointIndex( __WPL:getNearestWaypoint(player.X, player.Z, player.Y , true) );
 		local hf_wp = __WPL:getNextWaypoint();
 		local dist_to_wp = distance(player.X, player.Z, player.Y, hf_wp.X, hf_wp.Z, hf_wp.Y)
 
-		__RPL:setWaypointIndex( __RPL:getNearestWaypoint(player.X, player.Z, player.Y ) );
+		__RPL:setWaypointIndex( __RPL:getNearestWaypoint(player.X, player.Z, player.Y, true ) );
 		local hf_wp = __RPL:getNextWaypoint();
 		local dist_to_rp = distance(player.X, player.Z, player.Y, hf_wp.X, hf_wp.Z, hf_wp.Y)
 
@@ -698,7 +711,7 @@ function main()
 		if __WPL.ResumePoint then
 			__WPL:setWaypointIndex(__WPL.ResumePoint)
 		else
-			__WPL:setWaypointIndex( __WPL:getNearestWaypoint(player.X, player.Z, player.Y ) );
+			__WPL:setWaypointIndex( __WPL:getNearestWaypoint(player.X, player.Z, player.Y, true ) );
 		end
 	end;
 
@@ -715,25 +728,42 @@ function main()
 		end
 	end
 
-	-- Remember login details
+	local isupdate = false;
+	local checkAddressisupdate = false;
+	local logoutCheckisupdate = false;
+	local updateAliveisupdate = false;
+	local updateBattlingisupdate = false;
+	local updateLevelisupdate = false;
 	CurrentLoginAcc = RoMScript("LogID")
 	CurrentLoginChar = RoMScript("CHARACTER_SELECT.selectedIndex")
 	CurrentLoginServer = RoMScript ("GetCurrentRealm()")
 
-	local function checkClientCrash()
-		if isClientCrashed() then
-			if onClientCrash then
-				print("Client crash detected. Running onClientCrash().")
-				onClientCrash()
-			else
-				error("Client crash detected.")
-			end
-		end
-	end
-	registerTimer("ClientDetection", secondsToTimer(2), checkClientCrash);
-
 	local distBreakCount = 0; -- If exceedes 3 in a row, unstick.
+
+	--local linda = createLinda("M")
+	local function checkupdate()
+		player:checkAddress();
+		player:logoutCheck();
+		player:updateAlive();
+		-- we are now not in the fight routines
+		player:updateBattling();
+		player:updateLevel();
+		return true;
+	end
+
+	--	lanes.gen( *,checkclient )
+	registerTimer("ClientDetection", secondsToTimer(5), checkclient);
+	--registerTimer("LogoutDetection", secondsToTimer(5),checklogin);
+	--player:update() for k,v in pairs(player.Buffs) do print(v.Id, v.Name) end
 	while(true) do
+		if( updateAliveisupdate == false)then  player:updateAlive(); else updateAliveisupdate = false; end
+
+
+		if( not player.Alive ) then
+			player:resetSkillLastCastTime();	-- set last use back, so we can rebuff
+			resurrect();
+		end
+
 		while __WPL.DoOnload do
 			__WPL.DoOnload = false
 			__WPL.onLoadEvent()
@@ -741,16 +771,17 @@ function main()
 		if __WPL.Mode == "waypoints" and #__WPL.Waypoints == 0 then -- Can't got to 'waypoints' with no waypoints
 			error(language[114],1) -- No waypoints to go to
 		end
+		if( checkAddressisupdate == false)then player:checkAddress(); else checkAddressisupdate = false; end
+		if( logoutCheckisupdate == false)then player:logoutCheck(); else logoutCheckisupdate = false;	end
 
-		player:checkAddress()
-		player:logoutCheck();
-		player.Fighting = false;		-- we are now not in the fight routines
-
-		player:updateAlive()
-		if( not player.Alive ) then
-			player:resetSkillLastCastTime();	-- set last use back, so we can rebuff
-			resurrect();
+		if( updateBattlingisupdate == false)then
+			player.Fighting = false;		-- we are now not in the fight routines
+			player:updateBattling();
+		else
+			updateBattlingisupdate = false;
 		end
+		if( updateLevelisupdate == false)then 	player:updateLevel(); else updateLevelisupdate = false; end
+
 
 		-- reloading ammunition
 		if ( settings.profile.options.RELOAD_AMMUNITION ) then
@@ -852,97 +883,161 @@ function main()
 		end
 
 		if( player.Current_waypoint_type ~= WPT_TRAVEL and player:haveTarget() ) then
+			targetover2 = player:getTarget();
 			-- only fight back if it's not a TRAVEL waypoint
 			-- remember players position at fight start
-			local FightStartX = player.X;
-			local FightStartZ = player.Z;
+			local target = player:getTarget();
+			local FightStartX = target.X;
+			local FightStartZ = target.Z;
+			if(distance(player.X, player.Z, player.Y, target.X, target.Z, target.Y) >= 50)then
+				FightStartX = target.X;
+				FightStartZ = target.Z;
+			else
+				FightStartX = player.X;
+				FightStartZ = player.Z;
+			end
+
+			local function thread1()
+				if(isupdate == false)then
+					isupdate = true;
+					player:checkAddress();
+					checkAddressisupdate = true;
+					player:logoutCheck();
+					logoutCheckisupdate = true;
+					player:updateAlive();
+					-- we are now not in the fight routines
+					updateAliveisupdate = true;
+					player.Fighting = false;
+					player:updateBattling();
+					updateBattlingisupdate = true;
+
+
+					player:updateLevel();
+					updateLevelisupdate = true;
+					isupdate = false;
+				end
+			end
+			createThread("thread1", thread1);
+
+
+
+			local function thread2()
+				--	player:target(player:findEnemy(true,nil,evalTargetDefault))
+				--	local targetover = player:getTarget();
+				local WPLorRPL;	-- current WP we want to reach next
+				if( player.Returning ) then
+					WPLorRPL = __RPL;	-- we are on a return path waypoint file
+				else
+					WPLorRPL = __WPL;	-- we are using a normal waypoint file
+				end;
+				if( WPLorRPL:getMode() ~= "wander" ) then
+					local currentWp = WPLorRPL:getNextWaypoint();	-- get current wp we try to reach
+
+
+					-- calculate direction in rad for: fight start postition -> current waypoint
+					local dir_fightstart_to_currentwp = math.atan2(currentWp.Z - FightStartZ, currentWp.X - FightStartX);
+					local dist_fightstart_to_currentwp = distance(FightStartX, FightStartZ, currentWp.X, currentWp.Z);
+
+					-- calculate direction in rad for: fight start postition -> fight end postition
+					local dir_fightstart_to_fightend = math.atan2(player.Z - FightStartZ, player.X - FightStartX);
+					local dist_fightstart_to_fightend = distance(player.X, player.Z, FightStartX, FightStartZ);
+
+					-- calculate how much  fighstart, wp and fightend are on a line, 0 = one line,
+					local angleDif = angleDifference(dir_fightstart_to_currentwp, dir_fightstart_to_fightend);
+					if (settings.profile.options.DEBUG_WAYPOINT) then
+						printf("[DEBUG] FightStartX %s FightStartZ %s\n", FightStartX, FightStartZ );
+						printf("[DEBUG] dir_FS->WP rad %.3f dir_FS->FE rad %.3f\n", dir_fightstart_to_currentwp, dir_fightstart_to_fightend );
+						cprintf(cli.yellow, "[DEBUG] Line FS->WP / FS->FE: angleDif rad %.3f grad %d\n", angleDif, math.deg(angleDif) );
+					end
+
+					-- c = Wurzel (a2 + b2 - 2 a b cos (ga))
+					local a = dist_fightstart_to_currentwp;
+					local b = dist_fightstart_to_currentwp;
+					local ga = angleDif;
+					local dist_to_passed_wp = math.sqrt( math.pow(a,2) + math.pow(b,2) - 2 * a * b * math.cos(ga) );
+					if (settings.profile.options.DEBUG_WAYPOINT) then
+						cprintf(cli.yellow, "[DEBUG] We (would) pass(ed) wp #%s (dist %.1f) in a dist of %d (skip at %d)\n", currentWp.wpnum, dist_fightstart_to_currentwp,  dist_to_passed_wp, settings.profile.options.WAYPOINT_PASS );
+					end
+
+					if( dist_to_passed_wp < settings.profile.options.WAYPOINT_PASS  and		-- default is 100
+					dist_fightstart_to_fightend >= dist_fightstart_to_currentwp ) then
+
+						-- check position of the waypoint after the current waypoint we want to reach
+						-- we don't check the closest wp, thats to much effort, we assume the distance between wp is
+						-- as far, that the next one is always the closest
+						local nextWp = WPLorRPL:getNextWaypoint(1);	-- get current wp we try to reach +1
+						local dir_fightend_to_nextwp = math.atan2(nextWp.Z - player.Z, nextWp.X - player.X);
+						local dir_fightend_to_currentwp = math.atan2(currentWp.Z - player.Z, currentWp.X - player.X );
+						angleDif = angleDifference(dir_fightend_to_currentwp, dir_fightend_to_nextwp);
+						if (settings.profile.options.DEBUG_WAYPOINT) then
+							printf( "[DEBUG] currentWp #%s %s %s, FE->WP rad %.3f\n", currentWp.wpnum,currentWp.X,currentWp.Z,dir_fightend_to_currentwp);
+							printf( "[DEBUG] nextWp #%s %s %s, FE->WP rad %.3f\n", nextWp.wpnum,nextWp.X,nextWp.Z,dir_fightend_to_nextwp);
+							cprintf(cli.yellow, "[DEBUG] FE->wp#%s to FE->wp#%s is in a angle of %d grad (skip at %d)\n", nextWp.wpnum,  currentWp.wpnum, math.deg(angleDif), settings.profile.options.WAYPOINT_PASS_DEGR );
+						end
+
+						-- if next waypoint is 'in front' of current waypoint
+						if( true and not( currentWp.WP_NO_STOP == false or currentWp.WP_NO_COROUTINE == false)) then	-- default 90
+							if (settings.profile.options.DEBUG_WAYPOINT) then
+								cprintf(cli.yellow, "[DEBUG] We overrun waypoint #%d, skip it and move on to #%d\n",currentWp.wpnum, nextWp.wpnum);
+							end
+							cprintf(cli.green, "We overrun waypoint #%d, skip it and move on to #%d\n",currentWp.wpnum, nextWp.wpnum);
+							WPLorRPL:advance();	-- set next waypoint
+
+							-- execute the action from the skiped wp
+							if( currentWp.Action and type(currentWp.Action) == "string" ) then
+								local actionchunk = loadstring(currentWp.Action);
+								assert( actionchunk,  sprintf(language[150], WPLorRPL.CurrentWaypoint) );
+								actionchunk();
+							end
+							__WPL:updateResume()
+						end
+					end -- end of: check to skip a waypoint
+				end
+			end
+			createThread("thread2", thread2);
+
+
+
+
 
 			-- Other check were done in defaultEvalFunction
 			player:fight();
+		---player.retargeting = false;
+		-- check if we (as melee) can skip a waypoint because we touched it while moving to the fight place
+		-- we do the check for all classes, even mostly only melees are touched by that, because only
+		-- they move within the fightstart/-end
 
-			-- check if we (as melee) can skip a waypoint because we touched it while moving to the fight place
-			-- we do the check for all classes, even mostly only melees are touched by that, because only
-			-- they move within the fightstart/-end
-			local WPLorRPL;	-- current WP we want to reach next
-			if( player.Returning ) then
-				WPLorRPL = __RPL;	-- we are on a return path waypoint file
-			else
-				WPLorRPL = __WPL;	-- we are using a normal waypoint file
-			end;
-			if( WPLorRPL:getMode() ~= "wander" ) then
-				local currentWp = WPLorRPL:getNextWaypoint();	-- get current wp we try to reach
-
-				-- calculate direction in rad for: fight start postition -> current waypoint
-				local dir_fightstart_to_currentwp = math.atan2(currentWp.Z - FightStartZ, currentWp.X - FightStartX);
-				local dist_fightstart_to_currentwp = distance(FightStartX, FightStartZ, currentWp.X, currentWp.Z);
-
-				-- calculate direction in rad for: fight start postition -> fight end postition
-				local dir_fightstart_to_fightend = math.atan2(player.Z - FightStartZ, player.X - FightStartX);
-				local dist_fightstart_to_fightend = distance(player.X, player.Z, FightStartX, FightStartZ);
-
-				-- calculate how much  fighstart, wp and fightend are on a line, 0 = one line,
-				local angleDif = angleDifference(dir_fightstart_to_currentwp, dir_fightstart_to_fightend);
-				if (settings.profile.options.DEBUG_WAYPOINT) then
-					printf("[DEBUG] FightStartX %s FightStartZ %s\n", FightStartX, FightStartZ );
-					printf("[DEBUG] dir_FS->WP rad %.3f dir_FS->FE rad %.3f\n", dir_fightstart_to_currentwp, dir_fightstart_to_fightend );
-					cprintf(cli.yellow, "[DEBUG] Line FS->WP / FS->FE: angleDif rad %.3f grad %d\n", angleDif, math.deg(angleDif) );
-				end
-
-				-- c = Wurzel (a2 + b2 - 2 a b cos (ga))
-				local a = dist_fightstart_to_currentwp;
-				local b = dist_fightstart_to_currentwp;
-				local ga = angleDif;
-				local dist_to_passed_wp = math.sqrt( math.pow(a,2) + math.pow(b,2) - 2 * a * b * math.cos(ga) );
-				if (settings.profile.options.DEBUG_WAYPOINT) then
-					cprintf(cli.yellow, "[DEBUG] We (would) pass(ed) wp #%s (dist %.1f) in a dist of %d (skip at %d)\n", currentWp.wpnum, dist_fightstart_to_currentwp,  dist_to_passed_wp, settings.profile.options.WAYPOINT_PASS );
-				end
-
-				if( dist_to_passed_wp < settings.profile.options.WAYPOINT_PASS  and		-- default is 100
-					dist_fightstart_to_fightend >= dist_fightstart_to_currentwp ) then
-
-					-- check position of the waypoint after the current waypoint we want to reach
-					-- we don't check the closest wp, thats to much effort, we assume the distance between wp is
-					-- as far, that the next one is always the closest
-					local nextWp = WPLorRPL:getNextWaypoint(1);	-- get current wp we try to reach +1
-					local dir_fightend_to_nextwp = math.atan2(nextWp.Z - player.Z, nextWp.X - player.X);
-					local dir_fightend_to_currentwp = math.atan2(currentWp.Z - player.Z, currentWp.X - player.X );
-					angleDif = angleDifference(dir_fightend_to_currentwp, dir_fightend_to_nextwp);
-					if (settings.profile.options.DEBUG_WAYPOINT) then
-						printf( "[DEBUG] currentWp #%s %s %s, FE->WP rad %.3f\n", currentWp.wpnum,currentWp.X,currentWp.Z,dir_fightend_to_currentwp);
-						printf( "[DEBUG] nextWp #%s %s %s, FE->WP rad %.3f\n", nextWp.wpnum,nextWp.X,nextWp.Z,dir_fightend_to_nextwp);
-						cprintf(cli.yellow, "[DEBUG] FE->wp#%s to FE->wp#%s is in a angle of %d grad (skip at %d)\n", nextWp.wpnum,  currentWp.wpnum, math.deg(angleDif), settings.profile.options.WAYPOINT_PASS_DEGR );
-					end
-
-					-- if next waypoint is 'in front' of current waypoint
-					if( math.deg(angleDif) > settings.profile.options.WAYPOINT_PASS_DEGR ) then	-- default 90
-						if (settings.profile.options.DEBUG_WAYPOINT) then
-							cprintf(cli.yellow, "[DEBUG] We overrun waypoint #%d, skip it and move on to #%d\n",currentWp.wpnum, nextWp.wpnum);
-						end
-						cprintf(cli.green, "We overrun waypoint #%d, skip it and move on to #%d\n",currentWp.wpnum, nextWp.wpnum);
-						WPLorRPL:advance();	-- set next waypoint
-
-						-- execute the action from the skiped wp
-						if( currentWp.Action and type(currentWp.Action) == "string" ) then
-							local actionchunk = loadstring(currentWp.Action);
-							assert( actionchunk,  sprintf(language[150], WPLorRPL.CurrentWaypoint) );
-							actionchunk();
-						end
-						__WPL:updateResume()
-
-					end
-
-				end 	-- end of: check to skip a waypoint
-			end
 
 
 		else
-		-- don't fight, move to wp
+
+			local function thread3()
+				if(isupdate ==false)then
+					isupdate = true;
+					player:checkAddress();
+					checkAddressisupdate = true;
+					player:logoutCheck();
+					logoutCheckisupdate = true;
+					player:updateAlive();
+					-- we are now not in the fight routines
+					updateAliveisupdate = true;
+					player.Fighting = false;
+					player:updateBattling();
+					updateBattlingisupdate = true;
+					player:updateLevel();
+					updateLevelisupdate = true;
+					isupdate = false;
+				end
+			end
+
+			createThread("thread3", thread3);
+			-- don't fight, move to wp
 			if player.TargetPtr ~= 0 then player:clearTarget(); end
 
 			-- First check up on eggpet
 			checkEggPets()
 
-			local wp = nil; local wpnum = nil;
+			local wp = nil; local wpnum = nil ;local zoneoption = nil;
 
 			if( player.Returning ) then
 				wp = __RPL:getNextWaypoint();
@@ -956,7 +1051,22 @@ function main()
 
 			player.Current_waypoint_type = wp.Type;		-- remember current waypoint type
 
-			local success, reason = player:moveTo(wp,nil,true);
+			local nostopoption  = wp.WP_NO_STOP;
+
+			if( nostopoption ~= nil) then
+
+				changeProfileOption("WP_NO_STOP", nostopoption);
+			end
+			local nocoroutine = wp.WP_NO_COROUTINE;
+
+			if( nocoroutine ~= nil) then
+
+				changeProfileOption("WP_NO_COROUTINE", nocoroutine);
+			end
+
+			zoneoption = wp.WP_ZONE;
+
+			local success, reason = player:moveTo(wp,nil,true,nil,zoneoption);
 
 			player:updateMounted()
 			if not player.Mounted then
@@ -968,13 +1078,17 @@ function main()
 				-- hence we reset the counter only after 3 successfull waypoints
 				player.Success_waypoints = player.Success_waypoints + 1;
 				if( player.Success_waypoints > 3 ) then
+					if(player.unstick_break == true)then
+						settings.profile.options.WP_NO_STOP = true;
+						player.unstick_break = false;
+					end
 					player.Unstick_counter = 0;	-- reset unstick counter
 				end;
 
 				if( player.Returning ) then
 					-- Completed. Return to normal waypoints.
 					if( __RPL.CurrentWaypoint >= #__RPL.Waypoints ) then
-						__WPL:setWaypointIndex(__WPL:getNearestWaypoint(player.X, player.Z, player.Y));
+						__WPL:setWaypointIndex(__WPL:getNearestWaypoint(player.X, player.Z, player.Y , true));
 						if( __WPL.Mode == "wander" ) then
 							__WPL.OrigX = player.X;
 							__WPL.OrigZ = player.Z;
@@ -987,20 +1101,53 @@ function main()
 					end
 
 					-- Execute it's action, if it has one.
-					if( wp.Action and type(wp.Action) == "string" and string.find(wp.Action,"%a") ) then
-						keyboardRelease( settings.hotkeys.MOVE_FORWARD.key ); yrest(200) -- Stop moving
-						local actionchunk = loadstring(wp.Action);
-						assert( actionchunk,  sprintf(language[150], __RPL.CurrentWaypoint) );
-						actionchunk();
+					if (settings.profile.options.WP_NO_STOP == true) then
+						if(settings.profile.options.WP_NO_COROUTINE == false) then
+							if( wp.Action and type(wp.Action) == "string" and string.find(wp.Action,"%a") ) then
+								local actionchunk = loadstring(wp.Action);
+								assert( actionchunk,  sprintf(language[150], __RPL.CurrentWaypoint) );
+								createThread("action1", actionchunk);
+							end
+						else
+							if( wp.Action and type(wp.Action) == "string" and string.find(wp.Action,"%a") ) then
+								local actionchunk = loadstring(wp.Action);
+								assert( actionchunk,  sprintf(language[150], __RPL.CurrentWaypoint) );
+								actionchunk();
+							end
+						end
+					else
+						if( wp.Action and type(wp.Action) == "string" and string.find(wp.Action,"%a") ) then
+							keyboardRelease( settings.hotkeys.MOVE_FORWARD.key ); yrest(200) -- Stop moving
+							local actionchunk = loadstring(wp.Action);
+							assert( actionchunk,  sprintf(language[150], __RPL.CurrentWaypoint) );
+							actionchunk();
+						end
 					end
 				else
 					__WPL:advance();
+
 					-- Execute it's action, if it has one.
-					if( wp.Action and type(wp.Action) == "string" and string.find(wp.Action,"%a") ) then
-						keyboardRelease( settings.hotkeys.MOVE_FORWARD.key ); yrest(200) -- Stop moving
-						local actionchunk = loadstring(wp.Action);
-						assert( actionchunk,  sprintf(language[150], __WPL.CurrentWaypoint) );
-						actionchunk();
+					if (settings.profile.options.WP_NO_STOP == true) then
+						if(settings.profile.options.WP_NO_COROUTINE == false) then
+							if( wp.Action and type(wp.Action) == "string" and string.find(wp.Action,"%a") ) then
+								local actionchunk = loadstring(wp.Action);
+								assert( actionchunk,  sprintf(language[150], __WPL.CurrentWaypoint) );
+								createThread("action2", actionchunk);
+							end
+						else
+							if( wp.Action and type(wp.Action) == "string" and string.find(wp.Action,"%a") ) then
+								local actionchunk = loadstring(wp.Action);
+								assert( actionchunk,  sprintf(language[150], __WPL.CurrentWaypoint) );
+								actionchunk();
+							end
+						end
+					else
+						if( wp.Action and type(wp.Action) == "string" and string.find(wp.Action,"%a") ) then
+							keyboardRelease( settings.hotkeys.MOVE_FORWARD.key ); yrest(200) -- Stop moving
+							local actionchunk = loadstring(wp.Action);
+							assert( actionchunk,  sprintf(language[150], __WPL.CurrentWaypoint) );
+							actionchunk();
+						end
 					end
 				end
 				__WPL:updateResume()
@@ -1031,11 +1178,15 @@ function main()
 					player:clearTarget();
 					player.Success_waypoints = 0;	-- counter for successfull waypoints in row
 					player.Unstick_counter = player.Unstick_counter + 1;	-- count our unstick tries
-
+					if( not isInGame())then
+						if(onClientLogout() ~= nil)then
+							onClientLogout()
+						end
+					end
 					-- Too many tries, logout
 					if( settings.profile.options.MAX_UNSTICK_TRIALS > 0 and
-						player.Unstick_counter > settings.profile.options.MAX_UNSTICK_TRIALS ) or
-						(not isInGame()) then
+					player.Unstick_counter > settings.profile.options.MAX_UNSTICK_TRIALS ) or
+					(not isInGame()) then
 
 						if isInGame() then
 							cprintf(cli.yellow, language[55],
@@ -1061,12 +1212,16 @@ function main()
 							player.Sleeping = true;		-- go to sleep
 							--stopPE();	-- pause the bot
 							-- we should play a sound !
+							if(player.unstick_break == true)then
+								settings.profile.options.WP_NO_STOP = true;
+								player.unstick_break = false;
+							end
 							player.Unstick_counter = 0;
 						end
 					elseif( player.Sleeping ~= true) then	-- not when to much trial and we go to sleep
 						-- unstick player und unstick message
 						cprintf(cli.red, language[9], player.X, player.Z, 	-- unsticking player... at position
-						   player.Unstick_counter, settings.profile.options.MAX_UNSTICK_TRIALS);
+						player.Unstick_counter, settings.profile.options.MAX_UNSTICK_TRIALS);
 						player:unstick();
 					end
 				end
@@ -1171,11 +1326,11 @@ function resurrect()
 	player.Returning = nil;
 	if( __RPL and __WPL.Mode ~= "wander" ) then
 		-- compare closest waypoint with closest returnpath point
-		__WPL:setWaypointIndex( __WPL:getNearestWaypoint(player.X, player.Z, player.Y ) );
+		__WPL:setWaypointIndex( __WPL:getNearestWaypoint(player.X, player.Z, player.Y, true ) );
 		local hf_wp = __WPL:getNextWaypoint();
 		local dist_to_wp = distance(player.X, player.Z, player.Y, hf_wp.X, hf_wp.Z, hf_wp.Y)
 
-		__RPL:setWaypointIndex(__RPL:getNearestWaypoint(player.X, player.Z) );
+		__RPL:setWaypointIndex(__RPL:getNearestWaypoint(player.X, player.Z, player.Y, true ) );
 		local hf_wp = __RPL:getNextWaypoint();
 		local dist_to_rp = distance(player.X, player.Z, player.Y, hf_wp.X, hf_wp.Z, hf_wp.Y)
 

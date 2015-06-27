@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><waypoints type="RUN">
 <onload>
+		changeProfileOption("TARGET_LEVELDIF_BELOW",40);
 		settings.profile.mobs = {100061}; -- Boar
 		function getBag()
 			if getQuestStatus(420064) == "incomplete" then -- The Lost Supplies

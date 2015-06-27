@@ -2,15 +2,15 @@
 	<!-- Mage Skills -->
 	<!-- General -->
 	<skill name="MAGE_FIREBALL" 						id="490204" range="225" type="damage" 		casstime="0"	cooldown="6"	target="enemy"		priority="65" />
-	<skill name="MAGE_LIGHTNING"						id="490212" range="150" type="damage" 		casttime="0"	cooldown="20"	target="enemy"		minrange="75" priority="100" />
-	<skill name="MAGE_INTENSIFICATION" 					id="497976" range="225" type="buff"			casttime="0"	cooldown="120"  target="enemy"		buffname="620177" />
-	<skill name="MAGE_SILENCE"							id="490296" range="150" type="damage"		casttime="0"	cooldown="24"	target="enemy" />
-	<skill name="MAGE_FIRE_WARD"						id="490248" range="100"	type="buff"			casttime="0"	cooldown="0"	target="party"		buffname="500366" />
+	<skill name="MAGE_LIGHTNING"						id="490212" range="150" type="damage" 		casttime="0"	cooldown="20"	target="enemy"		minrange="75" />
+	<skill name="MAGE_INTENSIFICATION" 					id="497976" range="225" type="buff"			casttime="0"	cooldown="120"  target="self"		buffname="620177" />
+	<skill name="MAGE_SILENCE"							id="490296" range="150" type="buff"			casttime="0"	cooldown="24"	target="enemy"		buffname="500529" />
+	<skill name="MAGE_FIRE_WARD"						id="490248" range="100"	type="buff"			casttime="0"	cooldown="0"	target="self"		buffname="500366" />
 	<!-- Primary -->
 	<skill name="MAGE_ELEMENTAL_CATALYSIS"				id="490238" range="225" type="buff"			casttime="0"	cooldown="300"	target="enemy"		buffname="500339" />
 	<skill name="MAGE_FLAME"							id="491150" range="225" type="damage"		casttime="3"	cooldown="0"	target="enemy" />
 	<skill name="MAGE_ELECTROSTATIC_CHARGE"				id="491156" range=""	type="buff"			casttime="0"	cooldown="120"  target="self"		buffname="501538" />
-	<skill name="MAGE_PLASMA_ARROW"						id="491169" range="200" type="damage"		casttime="2"	cooldown="0"	target="enemy" />
+	<skill name="MAGE_PLASMA_ARROW"						id="491169" range="200" type="damage"		casttime="2"	cooldown="0"	target="enemy"  nobuffname="502270" nobufftarget="target"/>
 	<skill name="MAGE_ELECTRIC_BOLT"					id="491168" range="200" type="dot"			casttime="1"	cooldown="0"	target="enemy"		buffname="501550" />
 	<skill name="MAGE_DISCHARGE"						id="490242" range="60" 	type="damage" 		casttime="0"	cooldown="15"	target="enemy"		aoecenter="player"/>
 	<skill name="MAGE_METEOR_SHOWER"					id="490252" range="150" type="damage"		casttime="5"	cooldown="0"	target="enemy"		globalcooldown="true" />
@@ -26,10 +26,10 @@
 
 	<!-- Mage Elites by Subclass -->
 	<!-- Mage/Champion -->
-	<skill name="MAGE_BRAIN_SHOCK"						id="498825" range="0" 	type="buff"			casttime="0"	cooldown="0"	target="self" />
+	<skill name="MAGE_BRAIN_SHOCK"						id="498825" range="0" 	type="buff"			casttime="0"	cooldown="0"	target="self"		buffname="621621"/>
 	<skill name="MAGE_VOLTAGE_SEIZE"					id="498864" range="220" type="damage"		casttime="0"	cooldown="0"	target="enemy"		reqbuffname="621629" reqbufftarget="player" />
 	<skill name="MAGE_ELECTROLYSIS_POWER"				id="498869" range="0"	type="buff"			casttime="0"	cooldown="120"	target="self" />
-	<skill name="MAGE_ION_STORM"						id="498873" range="0" 	type="damage"		casttime="0"	cooldown="120"	target="enemy"		aoecenter="player" />
+	<skill name="MAGE_ION_STORM"						id="498873" range="0" 	type="buff"			casttime="0"	cooldown="120"	target="self"	buffname="621634" aoecenter="player" />
 	<skill name="MAGE_LIGHTNING_SHIELD"					id="499811" range="0"	type="buff"			casttime="0"	cooldown="20"	target="self" />
 	<skill name="MAGE_ION_BARRIER"						id="499807" range="0"	type="buff"			casttime="2"	cooldown="0"	target="self" />
 	<!-- Mage/Druid -->
@@ -41,13 +41,14 @@
 	<skill name="MAGE_STARS_OF_LIGHT"					id="491347" range="200" type="damage"		casttime="4"	cooldown="2"	target="enemy" />
 	<skill name="MAGE_MESSENGER_OF_LIGHT"				id="491599" range="0"	type="buff"			casttime="0"	cooldown="0"	target="self"		buffname="502034" />
 	<skill name="MAGE_LIGHT_CHARGE"						id="492634" range="150" type="damage"		casttime="0"	cooldown="8"	target="enemy"		minrange="80" priority="100" />
+	<skill name="MAGE_ENERGY_INFLUX_KNIGHT"				id="493323" range=""	type="buff"			casttime="0"	cooldown="120"  target="self"		buffname="503541,503746" />
 	<!-- Mage/Priest -->
 	<skill name="MAGE_ESSENCE_OF_MAGIC"					id="491587" range="200" type="buff"			casttime="0"	cooldown="0"	target="friendly"	buffname="501962" />
 	<skill name="MAGE_PURIFY"							id="491588" range="200" type="buff"			casttime="0"	cooldown="10"	target="friendly" />
 	<skill name="MAGE_RISING_TIDE"						id="490256" range="217" type="damage"		casttime="0"	cooldown="4"	target="enemy" />
 	<skill name="MAGE_MAGIC_DRAIN"						id="493265" range="180" type="damage"		casttime="0"	cooldown="60"	target="enemy" />
 	<!-- Mage/Rogue -->
-	<skill name="MAGE_CURSED_FANGS"						id="491578" range="200" type="dot"			casttime="0"	cooldown="0"	target="enemy"		buffname="501960" />
+	<skill name="MAGE_CURSED_FANGS"						id="491578" range="200" type="dot"			casttime="0"	cooldown="0"	target="enemy"		buffname="501960" needammo="true" />
 	<skill name="MAGE_KISS_OF_THE_VAMPIRE"				id="491345" range="150" type="damage"		casttime="0"	cooldown="60"	target="enemy" />
 	<skill name="MAGE_DEMORALIZE"						id="491348" range="150" type="damage"		casttime="0"	cooldown="60"	target="enemy" />
 	<skill name="MAGE_FANG_RITUAL"						id="491581" range="0"	type="buff"			casttime="0"	cooldown="0"	target="self"		buffname="502036" />
@@ -65,7 +66,6 @@
 	<skill name="MAGE_EARTH_SURGE"						id="494049" range="200"	type="damage"		casttime="0"	cooldown="3"	target="enemy" />
 	<skill name="MAGE_EARTH_GROANING_WIND_BLADE"		id="494330" range="250"	type="damage"		casttime="0"	cooldown="6"	target="enemy" />
 	<skill name="MAGE_EARTH_SCEPTER"					id="494562" range="0"	type="buff"			casttime="0"	cooldown="0"	target="self"		buffname="504913" />
-	<Skill name="MAGE_EARTH_CORE_BARRIER"				id="499620" range="0"	type="buff"			casttime="0"	cooldown="180"	target="self" 		buffname="623219" />
 	<!-- Mage/Warlock -->
 	<skill name="MAGE_STATIC_RESONANCE"					id="498744" range="0"	type="buff"			casttime="0"	cooldown="120"	target="self" />
 	<skill name="MAGE_BREATH_ERASE"						id="498750" range="0"	type="buff"			casttime="0"	cooldown="120"	target="self" />
@@ -262,14 +262,14 @@
 
 	<!-- Rogue skills -->
 	<!-- General -->
-	<skill name="ROGUE_SHADOWSTAB" 						id="490306" range="50"	type="damage"		casttime="0"	cooldown="0"	target="enemy" />
+	<skill name="ROGUE_SHADOWSTAB" 						id="490306" range="50"	type="damage"		casttime="0"	cooldown="0"	target="enemy" nobuffname="620313" nobufftarget="target" />
 	<skill name="ROGUE_THROW" 							id="490309" range="150"	type="damage"		casttime="0"	cooldown="4"	target="enemy" />
 	<skill name="ROGUE_BLIND_STAB" 						id="490317" range="50"	type="damage"		casttime="0"	cooldown="10"	target="enemy" />
 	<skill name="ROGUE_SHADOW_STEP" 					id="490344" range="100"	type="damage"		casttime="0"	cooldown="20"	target="enemy" />
 	<!-- Primary -->
 	<skill name="ROGUE_ASSASSINS_RAGE" 					id="490506" range="0"	type="buff"			casttime="0"	cooldown="300"	target="self"		inbattle="true" />
-	<skill name="ROGUE_LOW_BLOW" 						id="490323" range="50"	type="damage"		casttime="0"	cooldown="0"	target="enemy" />
-	<skill name="ROGUE_WOUND_ATTACK" 					id="490313" range="50"	type="damage"		casttime="0"	cooldown="6"	target="enemy" />
+	<skill name="ROGUE_LOW_BLOW" 						id="490323" range="50"	type="damage"		casttime="0"	cooldown="0"	target="enemy"   	reqbuffname="620313" reqbufftarget="target" nobuffname="500704" nobufftarget="target" />
+	<skill name="ROGUE_WOUND_ATTACK" 					id="490313" range="50"	type="damage"		casttime="0"	cooldown="6"	target="enemy"  	reqbuffname="500704" reqbufftarget="target"/>
 	<skill name="ROGUE_BLIND_SPOT" 						id="490311" range="50"	type="damage"		casttime="0"	cooldown="6"	target="enemy" />
 	<skill name="ROGUE_NUMBING_DAGGER" 					id="490347" range="150"	type="damage"		casttime="1"	cooldown="0"	target="enemy"		reqbuffname="500715" reqbufftarget="player" buffname="501494" />
 	<skill name="ROGUE_POISON" 							id="490329" range="0"	type="buff"			casttime="1"	cooldown="0"	target="self"		buffname="500715" /> <!-- Requires Poison Bottle 200762-->
@@ -306,13 +306,13 @@
 	<skill name="ROGUE_POWER_OF_THE_LION" 				id="492924" range="0"	type="heal"			casttime="0"	cooldown="60"	target="self"		reqbuffname="501946" reqbufftarget="player" />
 	<skill name="ROGUE_SEARING_LIGHT" 					id="493025" range="0"	type="buff"			casttime="0"	cooldown="0"	target="self"		nobuffname="500715" nobufftarget="player" buffname="503268" />
 	<!-- Rogue/Mage -->
-	<skill name="ROGUE_ENLIVENED_BLADE" 				id="491180" range="200"	type="damage"		casttime="1"	cooldown="12"	target="enemy" 		clicktocast="true" globalcooldown="true"/>
-	<skill name="ROGUE_DAY_OF_RAIN" 					id="491183" range="50"	type="damage"		casttime="0"	cooldown="25"	target="enemy"		aoecenter="player" />
-	<skill name="ROGUE_CREATE_OPPORTUNITY" 				id="493024" range="0"	type="buff"			casttime="0"	cooldown="120"	target="self"		buffname="503446" />
-	<skill name="ROGUE_INSTANT_SHADOW" 					id="497206" range="0"	type="buff"			casttime="0"	cooldown="0"	target="self"		buffname="502597" playerdodge="true" />
-	<skill name="ROGUE_ILLUSION_BLADE_DANCE"			id="491189" range="0"	type="damage"		casttime="0"	cooldown="0"	target="enemy"		buffname="502577" aoecenter="player" />
+	<skill name="ROGUE_ENLIVENED_BLADE" 				id="491180" range="200"	type="damage"		casttime="1"	cooldown="12"	target="enemy"		clicktocast="true" globalcooldown="true" needammo="true" />
+	<skill name="ROGUE_DAY_OF_RAIN" 					id="491183" range="50"	type="damage"		casttime="0"	cooldown="25"	target="enemy"		aoecenter="player"		aoerange="50"		needammo="true"/>
+	<skill name="ROGUE_CREATE_OPPORTUNITY" 				id="493024" range="0"	type="buff"			casttime="0"	cooldown="120"	target="self"		buffname="503446" inbattle="false" />
+	<skill name="ROGUE_INSTANT_SHADOW" 					id="497206" range="0"	type="buff"			casttime="0"	cooldown="0"	target="self"		buffname="502597" playerdodge="true"/> <!-- Requires a Successful Dodge -->
+	<skill name="ROGUE_ILLUSION_BLADE_DANCE"			id="491189" range="0"	type="damage"		casttime="0"	cooldown="0"	target="enemy"		buffname="502577" aoecenter="player"  needammo="true" />
 	<skill name="ROGUE_PREMEDITATION_MAGE" 				id="491182" range="0"	type="buff"			casttime="0"	cooldown="90"	target="self"		buffname="500961" inbattle="true" />
-	<skill name="ROGUE_ENCHANTED_THROW"					id="491178" range="0"	type="buff"			casttime="0"	cooldown="0"	target="self"		buffname="501279" inbattle="true" />
+	<skill name="ROGUE_ENCHANTED_THROW"					id="491178" range="0"	type="buff"			casttime="0"	cooldown="0"	target="self"		buffname="501279" inbattle="true" needammo="true"/>
 	<!-- Rogue/Priest -->
 	<skill name="ROGUE_QUICKNESS_AURA" 					id="491536" range="100"	type="buff"			casttime="0"	cooldown="0"	target="party"		buffname="501932" />
 	<skill name="ROGUE_FEARLESS" 						id="491540" range="0"	type="buff"			casttime="0"	cooldown="60"	target="self" />
@@ -539,7 +539,6 @@
 	<skill name="DRUID_WARM_SPRING"		 				id="494366"	range="0"	type="buff"			casttime="0"	cooldown="180"	target="self"		buffname="505159" />
 	<skill name="DRUID_MOTHER_EARTHS_BLESSING"			id="494367"	range="0"	type="buff"			casttime="0"	cooldown="60"	target="self" />
 	<!-- Druid/Warden -->
-	<skill name="DRUID_BRIAR_SHIELD"					id="494062" range="50" 	type="buff"			casttime="0"	cooldown="0"	target="friendly"	/>
 	<skill name="DRUID_HEALING_RIPPLE"	 				id="494323" range="250"	type="heal"			casttime="2"	cooldown="0"	target="friendly" />
 	<skill name="DRUID_MYSTERIOUS_GRACE" 				id="494372" range="100"	type="buff"			casttime="0"	cooldown="0"	target="party"		buffname="505165" />
 	<skill name="DRUID_ESSENCE_EXTRACTION" 				id="494373" range="0"	type="buff"			casttime="0"	cooldown="120"	target="self" />
@@ -549,7 +548,7 @@
 	<!-- Druid/Warrior -->
 	<skill name="DRUID_NATURAL_ATTACK" 					id="494016"	range="90"	type="damage"		casttime="0"	cooldown="4"	target="enemy" />
 	<skill name="DRUID_GLORY_WAND"	 					id="494017"	range="0"	type="buff"			casttime="0"	cooldown="0"	target="self" 		buffname="504526" />
-	<skill name="DRUID_CROSS_OF_THORNS_ATTACKS"			id="499956"	range="90"	type="damage"		casttime="0"	cooldown="6"	target="enemy" />
+	<skill name="DRUID_CROSS_OF_THORNS_ATTACK"			id="494018"	range="90"	type="damage"		casttime="0"	cooldown="6"	target="enemy" />
 	<skill name="DRUID_HEART_PIERCING" 					id="494216"	range="90"	type="damage"		casttime="0"	cooldown="8"	target="enemy" />
 	<skill name="DRUID_AWAKENING_OF_THE_WILD"			id="494364"	range="100"	type="buff"			casttime="0"	cooldown="0"	target="party"		buffname="620434" />
 	<skill name="DRUID_HEALING_WIND" 					id="494365"	range="0"	type="heal"			casttime="0"	cooldown="5"	target="self"		buffname="506051" />
@@ -608,11 +607,11 @@
 	<!-- Warden/Warrior -->
 	<skill name="WARDEN_DOUBLE_CHOP" 					id="494001"	range="50"	type="damage"		casttime="0"	cooldown="3"	target="enemy" />
 	<skill name="WARDEN_BEAST_CHOP" 					id="494002"	range="50"	type="damage"		casttime="0"	cooldown="7"	target="enemy"		buffname="503580" />
-	<skill name="WARDEN_IRE"		 					id="494003"	range="50"	type="buff"			casttime="0"	cooldown="30"	target="enemy" />
-	<skill name="WARDEN_IMMORTAL_POWER" 				id="498220"	range="0"	type="buff"			casttime="0"	cooldown="120"	target="self" />
+	<skill name="WARDEN_IRE"		 					id="494001"	range="50"	type="buff"			casttime="0"	cooldown="30"	target="enemy" />
+	<skill name="WARDEN_IMMORTAL_POWER" 				id="494001"	range="0"	type="buff"			casttime="0"	cooldown="120"	target="self" />
 	<skill name="WARDEN_PULSE_MASTERY" 					id="493607"	range="50"	type="damage"		casttime="0"	cooldown="0"	target="enemy"		reqbuffname="503580" reqbufftarget="target" />
-	<skill name="WARDEN_COAT_OF_ARMS" 					id="494611"	range="200"	type="buff"			casttime="0"	cooldown="180"	target="friendly" />
-	<skill name="WARDEN_FERAL_LEADER" 					id="499900"	range="0"	type="buff"			casttime="0"	cooldown="180"	target="self" />
+	<skill name="WARDEN_COAT_OF_ARMS" 					id="494001"	range="200"	type="buff"			casttime="0"	cooldown="180"	target="friendly" />
+	<skill name="WARDEN_FERAL_LEADER" 					id="494001"	range="0"	type="buff"			casttime="0"	cooldown="180"	target="self" />
 
 	<!-- Warlock skills -->
 	<!-- General -->
