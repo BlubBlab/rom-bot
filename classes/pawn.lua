@@ -503,7 +503,7 @@ function CPawn:updateBuffs()
 		tmp.Id = memoryReadRepeat("int", proc, i + addresses.pawnBuffId_offset);
 		local name = GetIdName(tmp.Id)
 
-		if name ~= nil and name ~= "" then
+		if name ~= nil or name ~= "" then
 			tmp.Name, tmp.Count = parseBuffName(name)
 			tmp.TimeLeft = memoryReadRepeat("float", proc, i + addresses.pawnBuffTimeLeft_offset);
 			tmp.Level = memoryReadRepeat("int", proc, i + addresses.pawnBuffLevel_offset);
@@ -770,6 +770,7 @@ end
 function CPawn:getBuff(buffnamesorids, count)
 	self:updateBuffs()
 
+<<<<<<< HEAD
 	--it's a number so we do it simple
 	if( type(tonumber(buffnamesorids))  == "number")then
 		-- for each buff the pawn has
@@ -781,16 +782,32 @@ function CPawn:getBuff(buffnamesorids, count)
 			end
 		end
 	end
+=======
+	if type(buffnamesorids) ~= "table" then
+		local buffs = {}
+		for buffname in string.gmatch(buffnamesorids,"[^,]+") do
+			table.insert(buffs, buffname)
+		end
+		buffnamesorids = buffs
+	end
+
+	-- for each buff the pawn has
+>>>>>>> elverion/master
 	for i, buff in pairs(self.Buffs) do
 		-- compare against each 'buffname'
-		for buffname in string.gmatch(buffnamesorids,"[^,]+") do
+		for j,buffname in pairs(buffnamesorids) do
 			if type(tonumber(buffname)) == "number" then
+				buffname = tonumber(buffname)
 				-- Get name from id
-				buffname = GetIdName(tonumber(buffname))
+				local tmpbuffname = GetIdName(buffname)
 				-- Take of end numbers
-				buffname = parseBuffName(buffname)
+				tmpbuffname = parseBuffName(tmpbuffname)
+				-- Use only if id has a name
+				if tmpbuffname ~= "" then
+					buffname = tmpbuffname
+				end
 			end
-			if buffname == buff.Name and ( count == nil or buff.Count >= count ) then
+			if (buffname == buff.Name or buffname == buff.Id) and ( count == nil or buff.Count >= count ) then
 				return buff
 			end
 		end
@@ -1125,7 +1142,7 @@ function CPawn:isOnMobIgnoreList()
 		if v.Address == self.Address then
 			-- Check if we can clear it
 			if distance(player,player.LastPlaceMobIgnored) > 50 and
-			   os.clock()-v.Time > 10 then
+				os.clock()-v.Time > 10 then
 				table.remove(player.MobIgnoreList,k)
 				return false
 			else

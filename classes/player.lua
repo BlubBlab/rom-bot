@@ -4272,7 +4272,7 @@ function CPlayer:aimAt(target)
 	memoryWriteFloat(getProc(), camera.Address + addresses.camY_offset, ny);
 end
 
-function CPlayer:clickToCast()
+function CPlayer:clickToCast( onmouseover )
 	-- Freeze mouse function
 	local function nopmouse()
 		-- x axis
@@ -4321,7 +4321,11 @@ function CPlayer:clickToCast()
 	memoryWriteIntPtr(getProc(),addresses.staticbase_char,addresses.mouseX_offset,clickX)
 	memoryWriteIntPtr(getProc(),addresses.staticbase_char,addresses.mouseY_offset,clickY)
 	yrest(50)
-	RoMCode("SpellTargetUnit()")
+	if onmouseover then
+		RoMCode('SpellTargetUnit("mouseover")')
+	else
+		RoMCode("SpellTargetUnit()")
+	end
 	yrest(50)
 	-- unfreeze TargetPtr
 	unnopmouse()

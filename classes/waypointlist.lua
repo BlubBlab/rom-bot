@@ -55,10 +55,15 @@ function CWaypointList:load(filename)
 		local action = v:getValue();
 		local name = v:getName() or "";
 		local tag = v:getAttribute("tag") or "";
+<<<<<<< HEAD
 		local wpstop = v:getAttribute("WP_NO_STOP");
 		local wpzone =  v:getAttribute("WP_ZONE");
 		local wpco  = v:getAttribute("WP_NO_COROUTINE");
 		if( string.lower(name) == "waypoint" ) then
+=======
+
+		if( string.lower(name) == "waypoint" ) and x and z then
+>>>>>>> elverion/master
 			local tmp = CWaypoint(x, z, y);
 			if( action ) then tmp.Action = action; end;
 			if( type ) then
