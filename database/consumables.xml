@@ -166,5 +166,6 @@
 	<potion type="phirusmana" 		id="203501" name="Phirius Elixir - Type C" potency="40" />			<!-- 40% -->
 	<potion type="phirusmana" 		id="203502" name="Phirius Elixir - Type D" potency="50" />			<!-- 50% -->
 	<potion type="phirusmana" 		id="203503" name="Phirius Elixir - Type E" potency="60" />			<!-- 60% -->
+	<potion type="phirusmana" 		id="203160" name="Pumpkin Soup of Happiness" potency="30" />		<!-- 30% -->
 
 </potions>

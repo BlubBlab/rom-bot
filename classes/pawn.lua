@@ -770,7 +770,7 @@ end
 function CPawn:getBuff(buffnamesorids, count)
 	self:updateBuffs()
 
-<<<<<<< HEAD
+
 	--it's a number so we do it simple
 	if( type(tonumber(buffnamesorids))  == "number")then
 		-- for each buff the pawn has
@@ -782,7 +782,7 @@ function CPawn:getBuff(buffnamesorids, count)
 			end
 		end
 	end
-=======
+
 	if type(buffnamesorids) ~= "table" then
 		local buffs = {}
 		for buffname in string.gmatch(buffnamesorids,"[^,]+") do
@@ -792,7 +792,7 @@ function CPawn:getBuff(buffnamesorids, count)
 	end
 
 	-- for each buff the pawn has
->>>>>>> elverion/master
+
 	for i, buff in pairs(self.Buffs) do
 		-- compare against each 'buffname'
 		for j,buffname in pairs(buffnamesorids) do
